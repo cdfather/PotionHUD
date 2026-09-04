@@ -10,8 +10,14 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class PotionRenderHandler {
+
+    private final Map<Integer, Integer> maxDurationMap = new HashMap<>();
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
@@ -26,14 +32,27 @@ public class PotionRenderHandler {
 
         Collection<PotionEffect> activePotions = mc.thePlayer.getActivePotionEffects();
         if (activePotions.isEmpty()) {
+            maxDurationMap.clear();
             return;
         }
+
+        // Aktif olmayan iksirleri haridadan temizle ve maksimum süreleri kaydet
+        Set<Integer> currentKeys = new HashSet<>();
+        for (PotionEffect effect : activePotions) {
+            int key = effect.getPotionID() + (effect.getAmplifier() * 100);
+            currentKeys.add(key);
+            int currentDuration = effect.getDuration();
+            if (!maxDurationMap.containsKey(key) || currentDuration > maxDurationMap.get(key)) {
+                maxDurationMap.put(key, currentDuration);
+            }
+        }
+        maxDurationMap.keySet().retainAll(currentKeys);
 
         FontRenderer fontRenderer = mc.fontRendererObj;
         ScaledResolution scaledResolution = new ScaledResolution(mc);
         int screenWidth = scaledResolution.getScaledWidth();
 
-        int yPos = 10; // Sağ üst köşe için başlangıç Y koordinatı
+        int yPos = 10;
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.0F, 1.0F, 1.0F);
@@ -50,7 +69,6 @@ public class PotionRenderHandler {
             int durationInTicks = effect.getDuration();
             int totalSeconds = durationInTicks / 20;
             
-            // Dakika ve Saniye formatı mantığı
             String durationText;
             if (totalSeconds >= 60) {
                 int minutes = totalSeconds / 60;
@@ -69,12 +87,10 @@ public class PotionRenderHandler {
                 textColor = 0xFFFF5555; // Kırmızı
             }
 
-            // Metinlerin toplam genişliğini hesapla (Sağdan hizalama için)
             int nameWidth = fontRenderer.getStringWidth(localizedName);
             int durationWidth = fontRenderer.getStringWidth(durationText);
             int totalWidth = nameWidth + 6 + durationWidth;
 
-            // X pozisyonunu sağ üst köşeye göre ayarla (Kenardan 10 piksel içeride)
             int xPos = screenWidth - totalWidth - 10;
 
             fontRenderer.drawStringWithShadow(localizedName, xPos, yPos, 0xFFFFFFFF);
@@ -83,9 +99,13 @@ public class PotionRenderHandler {
             int barWidth = totalWidth;
             int barY = yPos + fontRenderer.FONT_HEIGHT + 2;
 
-            int maxDuration = 1200; 
+            int key = effect.getPotionID() + (effect.getAmplifier() * 100);
+            int maxDuration = maxDurationMap.getOrDefault(key, durationInTicks);
+            if (maxDuration <= 0) maxDuration = 1;
+
             double progress = (double) durationInTicks / maxDuration;
             if (progress > 1.0) progress = 1.0;
+            if (progress < 0.0) progress = 0.0;
             int filledWidth = (int) (barWidth * progress);
 
             drawRect(xPos, barY, xPos + barWidth, barY + 1, 0x50000000);
