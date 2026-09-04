@@ -6,7 +6,6 @@
 * **Dynamic Countdown Counters:** Displays the remaining duration in seconds right next to the potion name for quick reading.
 * **1-Pixel Dynamic Bar:** Features a single-pixel progress bar directly underneath effect names for clear duration tracking.
 * **Smart Color-Coding:** Timers and progress bars dynamically change colors based on remaining time—green above 50%, yellow between 20% and 50%, and red below 20%.
-* **Critical Expiration Alert:** The progress bar blinks when an effect drops below the 20% duration threshold to notify the player.
 * **Universal Effect Tracking:** Tracks drinkable potions, splash potions, Beacon effects, Golden Apples, and mob debuffs in real time.
 
 ### Compatibility & License
