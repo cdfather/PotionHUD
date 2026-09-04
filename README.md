@@ -1,1 +1,14 @@
-deneme
+# 1-Pixel PotionHUD
+
+1-Pixel PotionHUD is a minimalist status effect HUD mod engineered for Minecraft 1.8.9 Forge. The mod focuses on presenting active status effects in a clean and compact layout that maximizes usable screen space.
+
+### Features
+* 1-Pixel Dynamic Bar: Features a single-pixel progress bar directly underneath effect names for clear duration tracking.
+* Three-Stage Color Logic: Changes bar color dynamically based on remaining time—green above 50%, yellow between 20% and 50%, and red below 20%.
+* Critical Expiration Alert: The progress bar blinks when an effect drops below the 20% duration threshold to notify the player.
+* Universal Effect Tracking: Tracks drinkable potions, splash potions, Beacon effects, Golden Apples, and mob debuffs in real time.
+
+### Compatibility & License
+Target Version: Minecraft 1.8.9  
+Mod Loader: Minecraft Forge (Client-Side Only)  
+License: MIT License (Open-source, feel free to include in modpacks.)
