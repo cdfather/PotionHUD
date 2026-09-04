@@ -1,4 +1,4 @@
-package com.example.potionhud;
+package com.potionhud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -13,10 +13,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PotionHudRenderer extends Gui {
+public class PotionRenderHandler extends Gui {
 
     private final Minecraft mc = Minecraft.getMinecraft();
-    // Her iksirin ilk başladığı maksimum süreyi saklayan harita
+    // Her etkilenmenin ilk başladığı maksimum süreyi saklayan harita
     private final Map<Integer, Integer> maxDurationMap = new HashMap<>();
 
     @SubscribeEvent
