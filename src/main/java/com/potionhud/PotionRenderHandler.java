@@ -1,4 +1,4 @@
-package com.potionhud;
+package com.example.potionhud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
@@ -13,74 +13,83 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PotionRenderHandler {
+public class PotionHudRenderer extends Gui {
 
     private final Minecraft mc = Minecraft.getMinecraft();
+    // Her iksirin ilk başladığı maksimum süreyi saklayan harita
     private final Map<Integer, Integer> maxDurationMap = new HashMap<>();
 
     @SubscribeEvent
     public void onRenderOverlay(RenderGameOverlayEvent.Post event) {
-        if (event.type != RenderGameOverlayEvent.ElementType.TEXT) return;
-        if (mc.thePlayer == null || mc.gameSettings.showDebugInfo) return;
+        if (event.type != RenderGameOverlayEvent.ElementType.TEXT || mc.thePlayer == null) {
+            return;
+        }
 
+        // Oyuncunun üzerindeki tüm aktif etkileri (içilen, patlayan, fener, elma, dış etkenler) okuyoruz
         Collection<PotionEffect> activeEffects = mc.thePlayer.getActivePotionEffects();
-        if (activeEffects.isEmpty()) return;
+        if (activeEffects.isEmpty()) {
+            maxDurationMap.clear();
+            return;
+        }
 
         ScaledResolution sr = new ScaledResolution(mc);
-        int screenWidth = sr.getScaledWidth();
-
-        int x = screenWidth - 110;
+        int x = sr.getScaledWidth() - 10; // Sağ tarafa hizalama
         int y = 10;
-        int barMaxWidth = 100;
 
         for (PotionEffect effect : activeEffects) {
             int potionId = effect.getPotionID();
-            if (potionId < 0 || potionId >= Potion.potionTypes.length) continue;
+            int currentDuration = effect.getDuration();
+
+            // Etki ilk kez geldiyse veya yenilendiyse başlangıç süresini kaydet
+            if (!maxDurationMap.containsKey(potionId) || currentDuration > maxDurationMap.get(potionId)) {
+                maxDurationMap.put(potionId, currentDuration);
+            }
+
+            int initialMaxDuration = maxDurationMap.get(potionId);
+
+            // Dolum oranını hesapla (İksir süresi ne olursa olsun %100 tam dolu başlar)
+            float progress = initialMaxDuration > 0 ? (float) currentDuration / initialMaxDuration : 0.0f;
+            progress = Math.min(1.0f, Math.max(0.0f, progress));
 
             Potion potion = Potion.potionTypes[potionId];
             if (potion == null) continue;
 
+            // İksir adı ve seviye okuması (Örn: Speed II)
             String effectName = I18n.format(potion.getName());
-            if (effect.getAmplifier() == 1) {
-                effectName += " II";
-            } else if (effect.getAmplifier() == 2) {
-                effectName += " III";
-            } else if (effect.getAmplifier() == 3) {
-                effectName += " IV";
-            } else if (effect.getAmplifier() > 3) {
-                effectName += " " + (effect.getAmplifier() + 1);
+            if (effect.getAmplifier() > 0) {
+                effectName += " " + I18n.format("enchantment.level." + (effect.getAmplifier() + 1));
             }
 
-            int currentDuration = effect.getDuration();
-            if (!maxDurationMap.containsKey(potionId) || maxDurationMap.get(potionId) < currentDuration) {
-                maxDurationMap.put(potionId, currentDuration);
-            }
-            int maxDuration = maxDurationMap.get(potionId);
-            if (maxDuration <= 0) maxDuration = currentDuration;
-
-            int totalSeconds = currentDuration / 20;
-            String timeText = String.format("%02d:%02d", totalSeconds / 60, totalSeconds % 60);
-
-            int timeColor = (totalSeconds < 10) ? 0xFF5555 : 0x55FF55;
-
-            mc.fontRendererObj.drawStringWithShadow(effectName, x, y, 0xFFFFFF);
-
-            int timeTextWidth = mc.fontRendererObj.getStringWidth(timeText);
-            mc.fontRendererObj.drawStringWithShadow(timeText, x + barMaxWidth - timeTextWidth, y, timeColor);
-
-            float ratio = Math.max(0.0f, Math.min(1.0f, (float) currentDuration / maxDuration));
-            int currentBarWidth = (int) (barMaxWidth * ratio);
-
-            int barY = y + 10;
-            int color = potion.getLiquidColor() | 0xFF000000;
-
-            Gui.drawRect(x, barY, x + barMaxWidth, barY + 1, 0x55000000);
-
-            if (currentBarWidth > 0) {
-                Gui.drawRect(x, barY, x + currentBarWidth, barY + 1, color);
+            // Dinamik Renk Belirleme (Yeşil -> Sarı -> Kırmızı)
+            int barColor;
+            if (progress > 0.50f) {
+                barColor = 0xFF00FF00; // Yeşil (%50 ve üzeri)
+            } else if (progress > 0.20f) {
+                barColor = 0xFFFFFF00; // Sarı (%20 - %50 arası)
+            } else {
+                // %20 Altı: Kırmızı ve Yanıp Sönme (Kritik Uyarı Efekti)
+                boolean blink = (mc.theWorld.getTotalWorldTime() % 10 < 5);
+                barColor = blink ? 0xFFFF0000 : 0x88FF0000;
             }
 
-            y += 16;
+            // Metin Çizimi
+            int textWidth = mc.fontRendererObj.getStringWidth(effectName);
+            int drawX = x - textWidth;
+            mc.fontRendererObj.drawStringWithShadow(effectName, drawX, y, 0xFFFFFFFF);
+
+            // 1-Pixel Dinamik Bar Çizimi
+            int barWidth = textWidth;
+            int currentBarWidth = (int) (barWidth * progress);
+            int barY = y + mc.fontRendererObj.FONT_HEIGHT + 1;
+
+            // Mat arka plan çizgisi ve dinamik renkli bar
+            drawRect(drawX, barY, drawX + barWidth, barY + 1, 0x55000000);
+            drawRect(drawX, barY, drawX + currentBarWidth, barY + 1, barColor);
+
+            y += mc.fontRendererObj.FONT_HEIGHT + 6; // Bir sonraki etki için alt satıra geç
         }
+
+        // Biten iksirleri hafızadan temizle
+        maxDurationMap.keySet().removeIf(id -> mc.thePlayer.getActivePotionEffect(Potion.potionTypes[id]) == null);
     }
 }
