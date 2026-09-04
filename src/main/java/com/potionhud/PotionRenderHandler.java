@@ -36,7 +36,6 @@ public class PotionRenderHandler {
             return;
         }
 
-        // Aktif olmayan iksirleri haridadan temizle ve maksimum süreleri kaydet
         Set<Integer> currentKeys = new HashSet<>();
         for (PotionEffect effect : activePotions) {
             int key = effect.getPotionID() + (effect.getAmplifier() * 100);
@@ -53,6 +52,7 @@ public class PotionRenderHandler {
         int screenWidth = scaledResolution.getScaledWidth();
 
         int yPos = 10;
+        int barWidth = 100; // Sabit bar genişliği
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.0F, 1.0F, 1.0F);
@@ -87,16 +87,14 @@ public class PotionRenderHandler {
                 textColor = 0xFFFF5555; // Kırmızı
             }
 
-            int nameWidth = fontRenderer.getStringWidth(localizedName);
-            int durationWidth = fontRenderer.getStringWidth(durationText);
-            int totalWidth = nameWidth + 6 + durationWidth;
+            // Sağ üst köşeye sabitlemek için ekran genişliğini kullanıyoruz
+            int xPos = screenWidth - barWidth - 10;
 
-            int xPos = screenWidth - totalWidth - 10;
-
+            // Metinleri ve sayacı barın üstüne yazdırıyoruz
             fontRenderer.drawStringWithShadow(localizedName, xPos, yPos, 0xFFFFFFFF);
-            fontRenderer.drawStringWithShadow(durationText, xPos + nameWidth + 6, yPos, textColor);
+            int durationWidth = fontRenderer.getStringWidth(durationText);
+            fontRenderer.drawStringWithShadow(durationText, xPos + barWidth - durationWidth, yPos, textColor);
 
-            int barWidth = totalWidth;
             int barY = yPos + fontRenderer.FONT_HEIGHT + 2;
 
             int key = effect.getPotionID() + (effect.getAmplifier() * 100);
@@ -108,10 +106,11 @@ public class PotionRenderHandler {
             if (progress < 0.0) progress = 0.0;
             int filledWidth = (int) (barWidth * progress);
 
+            // Arka plan ve doluluk barları
             drawRect(xPos, barY, xPos + barWidth, barY + 1, 0x50000000);
             drawRect(xPos, barY, xPos + filledWidth, barY + 1, textColor);
 
-            yPos += 14;
+            yPos += 18; // Alt alta binen satırlar için boşluk ayarı
         }
 
         GlStateManager.popMatrix();
