@@ -1,0 +1,16 @@
+[
+{
+  "modid": "potionhud",
+  "name": "1-Pixel Potion HUD",
+  "description": "Minimalist 1-pixel progress bar Potion HUD for Minecraft PvP.",
+  "version": "1.0.0",
+  "mcversion": "1.8.9",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Developer"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
