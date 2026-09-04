@@ -2,6 +2,7 @@ package com.potionhud;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.ScaledResolution;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
@@ -29,8 +30,10 @@ public class PotionRenderHandler {
         }
 
         FontRenderer fontRenderer = mc.fontRendererObj;
-        int xPos = 10;
-        int yPos = 10;
+        ScaledResolution scaledResolution = new ScaledResolution(mc);
+        int screenWidth = scaledResolution.getScaledWidth();
+
+        int yPos = 10; // Sağ üst köşe için başlangıç Y koordinatı
 
         GlStateManager.pushMatrix();
         GlStateManager.scale(1.0F, 1.0F, 1.0F);
@@ -45,8 +48,17 @@ public class PotionRenderHandler {
             }
 
             int durationInTicks = effect.getDuration();
-            int durationInSeconds = durationInTicks / 20;
-            String durationText = durationInSeconds + "s";
+            int totalSeconds = durationInTicks / 20;
+            
+            // Dakika ve Saniye formatı mantığı
+            String durationText;
+            if (totalSeconds >= 60) {
+                int minutes = totalSeconds / 60;
+                int seconds = totalSeconds % 60;
+                durationText = String.format("%d:%02d", minutes, seconds);
+            } else {
+                durationText = totalSeconds + "s";
+            }
 
             int textColor;
             if (durationInTicks > 600) {
@@ -57,11 +69,18 @@ public class PotionRenderHandler {
                 textColor = 0xFFFF5555; // Kırmızı
             }
 
-            fontRenderer.drawStringWithShadow(localizedName, xPos, yPos, 0xFFFFFFFF);
+            // Metinlerin toplam genişliğini hesapla (Sağdan hizalama için)
             int nameWidth = fontRenderer.getStringWidth(localizedName);
+            int durationWidth = fontRenderer.getStringWidth(durationText);
+            int totalWidth = nameWidth + 6 + durationWidth;
+
+            // X pozisyonunu sağ üst köşeye göre ayarla (Kenardan 10 piksel içeride)
+            int xPos = screenWidth - totalWidth - 10;
+
+            fontRenderer.drawStringWithShadow(localizedName, xPos, yPos, 0xFFFFFFFF);
             fontRenderer.drawStringWithShadow(durationText, xPos + nameWidth + 6, yPos, textColor);
 
-            int barWidth = nameWidth + fontRenderer.getStringWidth(durationText) + 6;
+            int barWidth = totalWidth;
             int barY = yPos + fontRenderer.FONT_HEIGHT + 2;
 
             int maxDuration = 1200; 
