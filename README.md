@@ -13,4 +13,4 @@ Target Version: Minecraft 1.8.9
 Mod Loader: Minecraft Forge (Client-Side Only)  
 License: MIT License (Open-source, feel free to include in modpacks.)
 
-[PotionHUD FORGE 1.8.9 Wiki](https://github.com/cdfather/PotionHUD/wiki)
+Learn more [PotionHUD FORGE 1.8.9 Wiki](https://github.com/cdfather/PotionHUD/wiki)
