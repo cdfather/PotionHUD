@@ -1,6 +1,6 @@
-# 1-Pixel PotionHUD
+#PotionHUD FORGE 1.8.9
 
-1-Pixel PotionHUD is a minimalist status effect HUD mod engineered for Minecraft 1.8.9 Forge. The mod focuses on presenting active status effects in a clean and compact layout that maximizes usable screen space.
+PotionHUD is a minimalist status effect HUD mod engineered for Minecraft 1.8.9 Forge. The mod focuses on presenting active status effects in a clean and compact layout that maximizes usable screen space.
 
 ### Features
 * **Dynamic Countdown Counters:** Displays the remaining duration in seconds right next to the potion name for quick reading.
