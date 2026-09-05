@@ -1,4 +1,4 @@
-#PotionHUD FORGE 1.8.9
+# PotionHUD FORGE 1.8.9
 
 PotionHUD is a minimalist status effect HUD mod engineered for Minecraft 1.8.9 Forge. The mod focuses on presenting active status effects in a clean and compact layout that maximizes usable screen space.
 
