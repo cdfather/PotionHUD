@@ -9,7 +9,7 @@
   "updateUrl": "",
   "authorList": ["Developer"],
   "credits": "",
-  "logoFile": "",
+  "logoFile": "assets/potionhud/logo.png",
   "screenshots": [],
   "dependencies": []
 }
